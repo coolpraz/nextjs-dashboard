@@ -9,19 +9,33 @@ import { Revenue } from '@/app/lib/definitions';
 // https://www.chartjs.org/
 // https://airbnb.io/visx/
 
-export default async function RevenueChart({
-  revenue,
-}: {
-  revenue: Revenue[];
-}) {
+async function getRevenueData() {
+  const res = await fetch('http://api.angels.test/api/revenue', {
+    cache: 'no-store',
+  });
+
+  if (!res.ok) {
+    throw new Error('Failed to fetch data');
+  }
+
+  const responseData = await res.json();
+
+  if (!responseData || !responseData.data) {
+    throw new Error('Invalid data structure in the response');
+  }
+
+  return responseData.data;
+}
+
+export default async function RevenueChart() {
+  const revenue: Revenue[] = await getRevenueData();
   const chartHeight = 350;
-  // NOTE: comment in this code when you get to this point in the course
 
-  // const { yAxisLabels, topLabel } = generateYAxis(revenue);
+  const { yAxisLabels, topLabel } = generateYAxis(revenue);
 
-  // if (!revenue || revenue.length === 0) {
-  //   return <p className="mt-4 text-gray-400">No data available.</p>;
-  // }
+  if (!revenue || revenue.length === 0) {
+    return <p className="mt-4 text-gray-400">No data available.</p>;
+  }
 
   return (
     <div className="w-full md:col-span-4">
@@ -30,8 +44,8 @@ export default async function RevenueChart({
       </h2>
       {/* NOTE: comment in this code when you get to this point in the course */}
 
-      {/* <div className="rounded-xl bg-gray-50 p-4">
-        <div className="sm:grid-cols-13 mt-0 grid grid-cols-12 items-end gap-2 rounded-md bg-white p-4 md:gap-4">
+      <div className="rounded-xl bg-gray-50 p-4">
+        <div className="mt-0 grid grid-cols-12 items-end gap-2 rounded-md bg-white p-4 sm:grid-cols-13 md:gap-4">
           <div
             className="mb-6 hidden flex-col justify-between text-sm text-gray-400 sm:flex"
             style={{ height: `${chartHeight}px` }}
@@ -59,7 +73,7 @@ export default async function RevenueChart({
           <CalendarIcon className="h-5 w-5 text-gray-500" />
           <h3 className="ml-2 text-sm text-gray-500 ">Last 12 months</h3>
         </div>
-      </div> */}
+      </div>
     </div>
   );
 }

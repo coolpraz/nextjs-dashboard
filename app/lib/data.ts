@@ -9,6 +9,7 @@ import {
   Revenue,
 } from './definitions';
 import { formatCurrency } from './utils';
+import { notFound } from 'next/navigation';
 
 export async function fetchRevenue() {
   // Add noStore() here prevent the response from being cached.
@@ -144,47 +145,75 @@ export async function fetchInvoicesPages(query: string) {
   }
 }
 
+// export async function fetchInvoiceById(id: string) {
+//   try {
+//     const data = await sql<InvoiceForm>`
+//       SELECT
+//         invoices.id,
+//         invoices.customer_id,
+//         invoices.amount,
+//         invoices.status
+//       FROM invoices
+//       WHERE invoices.id = ${id};
+//     `;
+
+//     const invoice = data.rows.map((invoice) => ({
+//       ...invoice,
+//       // Convert amount from cents to dollars
+//       amount: invoice.amount / 100,
+//     }));
+
+//     return invoice[0];
+//   } catch (error) {
+//     console.error('Database Error:', error);
+//     throw new Error('Failed to fetch invoice.');
+//   }
+// }
+
 export async function fetchInvoiceById(id: string) {
-  try {
-    const data = await sql<InvoiceForm>`
-      SELECT
-        invoices.id,
-        invoices.customer_id,
-        invoices.amount,
-        invoices.status
-      FROM invoices
-      WHERE invoices.id = ${id};
-    `;
+  const res = await fetch(`http://api.angels.test/api/invoice/${id}`, {
+    cache: 'no-store',
+  });
 
-    const invoice = data.rows.map((invoice) => ({
-      ...invoice,
-      // Convert amount from cents to dollars
-      amount: invoice.amount / 100,
-    }));
-
-    return invoice[0];
-  } catch (error) {
-    console.error('Database Error:', error);
-    throw new Error('Failed to fetch invoice.');
+  if (!res.ok) {
+    notFound();
   }
+  const responseData = await res.json();
+
+  console.log(responseData);
+
+  return responseData.data;
 }
 
-export async function fetchCustomers() {
-  try {
-    const data = await sql<CustomerField>`
-      SELECT
-        id,
-        name
-      FROM customers
-      ORDER BY name ASC
-    `;
+// export async function fetchCustomers() {
+//   try {
+//     const data = await sql<CustomerField>`
+//       SELECT
+//         id,
+//         name
+//       FROM customers
+//       ORDER BY name ASC
+//     `;
 
-    const customers = data.rows;
-    return customers;
-  } catch (err) {
-    console.error('Database Error:', err);
-    throw new Error('Failed to fetch all customers.');
+//     const customers = data.rows;
+//     return customers;
+//   } catch (err) {
+//     console.error('Database Error:', err);
+//     throw new Error('Failed to fetch all customers.');
+//   }
+// }
+export async function fetchCustomers() {
+  const res = await fetch('http://api.angels.test/api/customer', {
+    cache: 'no-store',
+  });
+
+  if (!res.ok) {
+    throw new Error('Failed to fetch data');
   }
+
+  const responseData = await res.json();
+
+  return responseData;
 }
 
 export async function fetchFilteredCustomers(query: string) {

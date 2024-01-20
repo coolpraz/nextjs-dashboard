@@ -5,6 +5,19 @@ import {
   InboxIcon,
 } from '@heroicons/react/24/outline';
 import { lusitana } from '@/app/ui/fonts';
+import { formatCurrency } from '@/app/lib/utils';
+
+async function getCardData() {
+  const res = await fetch('http://api.angels.test/api/fetchCardData', {
+    cache: 'no-store',
+  });
+
+  if (!res.ok) {
+    throw new Error('Failed to fetch data');
+  }
+
+  return res.json();
+}
 
 const iconMap = {
   collected: BanknotesIcon,
@@ -14,18 +27,30 @@ const iconMap = {
 };
 
 export default async function CardWrapper() {
+  const {
+    totalPaidInvoices,
+    totalPendingInvoices,
+    numberOfInvoices,
+    numberOfCustomers,
+  } = await getCardData();
   return (
     <>
-      {/* NOTE: comment in this code when you get to this point in the course */}
-
-      {/* <Card title="Collected" value={totalPaidInvoices} type="collected" />
-      <Card title="Pending" value={totalPendingInvoices} type="pending" />
+      <Card
+        title="Collected"
+        value={formatCurrency(totalPaidInvoices)}
+        type="collected"
+      />
+      <Card
+        title="Pending"
+        value={formatCurrency(totalPendingInvoices)}
+        type="pending"
+      />
       <Card title="Total Invoices" value={numberOfInvoices} type="invoices" />
       <Card
         title="Total Customers"
         value={numberOfCustomers}
         type="customers"
-      /> */}
+      />
     </>
   );
 }
